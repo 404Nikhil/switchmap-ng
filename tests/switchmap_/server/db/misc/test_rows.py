@@ -45,6 +45,7 @@ else:
     sys.exit(2)
 
 from tests.testlib_ import setup
+
 CONFIG = setup.config()
 CONFIG.save()
 
@@ -61,6 +62,7 @@ from switchmap.server.db.table import IRoot
 from switchmap.server.db.table import root as root_table
 from tests.testlib_ import db
 from tests.testlib_ import data
+
 
 class TestRows(unittest.TestCase):
     """Checks all functions and methods."""
@@ -81,17 +83,19 @@ class TestRows(unittest.TestCase):
         """Setup the database prior to each test."""
         # Create base event for tests
         self.event_row = event.create()
-        
+
         # Create base zone for tests
         self.zone_name = data.random_string()
         zone_data = IZone(
             idx_event=self.event_row.idx_event,
             name=self.zone_name,
             notes=data.random_string(),
-            enabled=1
+            enabled=1,
         )
         zone.insert_row(zone_data)
-        self.zone_record = zone.exists(self.event_row.idx_event, self.zone_name)
+        self.zone_record = zone.exists(
+            self.event_row.idx_event, self.zone_name
+        )
 
     def test_device_success(self):
         """Testing function device with valid device data."""
@@ -105,15 +109,15 @@ class TestRows(unittest.TestCase):
             sys_objectid=data.random_string(),
             sys_uptime=1000,
             last_polled=2000,
-            enabled=1
+            enabled=1,
         )
         device.insert_row(test_device)
-        
+
         device_record = device.exists(self.zone_record.idx_zone, "test_host")
-        
+
         # Test rows.device function
         result = rows.device(device_record)
-        
+
         # Verify results
         self.assertEqual(result.idx_device, device_record.idx_device)
         self.assertEqual(result.hostname.decode(), "test_host")
@@ -137,11 +141,11 @@ class TestRows(unittest.TestCase):
             sys_objectid=data.random_string(),
             sys_uptime=1000,
             last_polled=2000,
-            enabled=1
+            enabled=1,
         )
         device.insert_row(test_device)
         device_record = device.exists(self.zone_record.idx_zone, "test_host")
-        
+
         # Create test interface
         test_interface = IL1Interface(
             idx_device=device_record.idx_device,
@@ -165,15 +169,17 @@ class TestRows(unittest.TestCase):
             lldpremsyscapenabled="",
             lldpremsysdesc="",
             lldpremsysname="",
-            enabled=1
+            enabled=1,
         )
         l1interface.insert_row(test_interface)
-        
-        interface_record = l1interface.exists(device_record.idx_device, test_interface.ifindex)
-        
+
+        interface_record = l1interface.exists(
+            device_record.idx_device, test_interface.ifindex
+        )
+
         # Test rows.l1interface function
         result = rows.l1interface(interface_record)
-        
+
         # Verify results
         self.assertEqual(result.ifindex, 1)
         self.assertEqual(result.ifname.decode(), "Gi0/1")
@@ -190,17 +196,15 @@ class TestRows(unittest.TestCase):
         # Create test root
         root_name = data.random_string()
         test_root = IRoot(
-            idx_event=self.event_row.idx_event,
-            name=root_name,
-            enabled=1
+            idx_event=self.event_row.idx_event, name=root_name, enabled=1
         )
         root_table.insert_row(test_root)
-        
+
         root_record = root_table.exists(root_name)
-        
+
         # Test rows.root function
         result = rows.root(root_record)
-        
+
         # Verify results
         self.assertEqual(result.idx_root, root_record.idx_root)
         self.assertEqual(result.name.decode(), root_name)
@@ -209,6 +213,7 @@ class TestRows(unittest.TestCase):
         """Testing function root with non-existent root."""
         result = rows.root(None)
         self.assertIsNone(result)
+
 
 if __name__ == "__main__":
     unittest.main()
